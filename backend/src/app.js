@@ -11,12 +11,7 @@ const { notFound, errorHandler } = require("./middleware/errorMiddleware");
 
 const app = express();
 
-// Disable ETag to avoid frequent 304 Not Modified responses for API endpoints.
-app.set("etag", false);
 
-// Configure CORS: normalize CLIENT_URL (supports comma-separated origins),
-// trim trailing slashes and ensure protocol. If CLIENT_URL is not set,
-// allow all origins (useful for local development).
 const normalize = (u) => {
   if (!u) return "";
   let s = u.trim();
@@ -46,7 +41,6 @@ app.use(
 app.use(express.json());
 app.use(morgan("dev"));
 
-// Lightweight caching for GET API responses to reduce conditional requests from browsers.
 app.use((req, res, next) => {
   if (req.method === "GET" && req.path.startsWith("/api")) {
     // allow browser to cache for 60 seconds; adjust as needed

@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 
 const navItems = [
   { label: "Dashboard", path: "/dashboard" },
@@ -13,6 +13,24 @@ const Sidebar = () => {
   const { user, logout } = useAuth();
   const location = useLocation();
   const [open, setOpen] = useState(false);
+  const sidebarRef = useRef(null);
+  const hamburgerRef = useRef(null);
+
+  // Manage focus when opening/closing the mobile menu to avoid aria-hidden on
+  // an ancestor while a descendant still has focus (accessibility issue).
+  useEffect(() => {
+    if (open) {
+      // Move focus into the menu (first focusable element)
+      const first = sidebarRef.current?.querySelector('a,button,[tabindex]:not([tabindex="-1"])');
+      first?.focus();
+    } else {
+      // If a focused element is inside the sidebar, move focus back to hamburger
+      const active = document.activeElement;
+      if (sidebarRef.current && sidebarRef.current.contains(active)) {
+        hamburgerRef.current?.focus();
+      }
+    }
+  }, [open]);
 
   return (
     <>
@@ -31,10 +49,11 @@ const Sidebar = () => {
       {open && <div className="fixed inset-0 z-40 bg-black/40 md:hidden" onClick={() => setOpen(false)} />}
 
       <aside
+        ref={sidebarRef}
         className={`fixed inset-y-0 left-0 z-50 w-64 transform bg-slate-900 text-white p-5 transition-transform duration-200 md:static md:translate-x-0 md:w-64 md:min-h-screen ${
           open ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         }`}
-        aria-hidden={!open && "true"}
+        aria-hidden={!open}
       >
         <div className="relative flex h-full flex-col">
           <div className="mb-8">
@@ -43,6 +62,7 @@ const Sidebar = () => {
               {/* Close button for mobile */}
               <button
                 onClick={() => setOpen(false)}
+                ref={hamburgerRef}
                 className="md:hidden rounded bg-slate-800 p-1 text-slate-200"
                 aria-label="Close menu"
               >

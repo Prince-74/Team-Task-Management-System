@@ -8,49 +8,87 @@ https://team-task-management-dashboard.vercel.app/
 
 ## Overview
 
-This is a full-stack Team Task Management web application where users can create projects, assign tasks, and track progress. It supports role-based access with Admin and Member roles.
+The Team Task Manager is a full-stack web application designed to help teams manage projects, assign tasks, and track progress efficiently. It supports multiple users with role-based access control and provides a centralized dashboard for task monitoring.
 
 ---
 
 ## Tech Stack
 
-* Frontend: React (Vite) + Tailwind CSS
-* Backend: Node.js + Express.js
-* Database: MongoDB (Mongoose)
-* Authentication: JWT + bcrypt
+* **Frontend:** React (Vite) + Tailwind CSS
+* **Backend:** Node.js + Express.js
+* **Database:** MongoDB (Mongoose)
+* **Authentication:** JWT + bcrypt
 
 ---
 
-## Features
+## Core Features
 
-### Authentication
+### 1. User Authentication
 
-* User signup and login
-* Secure JWT-based authentication
+* Signup with name, email, and password
+* Secure login using JWT authentication
+* Protected routes using middleware
 
-### Project Management
+---
+
+### 2. Project Management
 
 * Create projects (creator becomes Admin)
-* Add/remove members
-* View assigned projects
+* Add and remove project members
+* Members can view assigned projects
 
-### Task Management
+---
 
-* Create tasks (Title, Description, Due Date, Priority)
+### 3. Task Management
+
+* Create tasks with:
+
+  * Title
+  * Description
+  * Due Date
+  * Priority (Low, Medium, High)
 * Assign tasks to users
-* Update task status (To Do, In Progress, Done)
+* Update task status:
 
-### Dashboard
+  * To Do
+  * In Progress
+  * Done
 
-* Total tasks
-* Tasks by status
-* Tasks per user
-* Overdue tasks
+---
 
-### Role-Based Access
+### 4. Dashboard
 
-* Admin: manage projects, users, and tasks
-* Member: view and update assigned tasks
+* Total number of tasks
+* Tasks categorized by status
+* Tasks assigned per user
+* Overdue tasks tracking
+
+---
+
+### 5. Role-Based Access Control
+
+* **Admin:**
+
+  * Manage projects and members
+  * Create and assign tasks
+
+* **Member:**
+
+  * View assigned tasks
+  * Update task status
+
+---
+
+## System Architecture
+
+The backend follows the **MVC (Model-View-Controller)** architecture:
+
+* Models: User, Project, Task
+* Controllers: Business logic handling
+* Routes: API endpoints
+* Middleware: Authentication and authorization
+
+The frontend uses a component-based architecture for modular and maintainable UI.
 
 ---
 
@@ -114,13 +152,18 @@ npm run dev
 
 ## Deployment
 
-The application is deployed using Railway and is publicly accessible.
+The application is deployed and publicly accessible:
+
+* **Frontend:** Vercel
+* **Backend:** Render
+
+Environment variables are properly configured to ensure seamless communication between frontend and backend.
 
 ---
 
 ## Submission Includes
 
-* Live application link
-* GitHub repository
-* README file
-* Demo video (2–5 minutes)
+* Live Application URL
+* GitHub Repository
+* README Documentation
+

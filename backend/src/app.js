@@ -31,10 +31,8 @@ const allowedOrigins = clientUrlEnv
 app.use(
   cors({
     origin: function (origin, callback) {
-      // allow requests with no origin (server-to-server, curl, postman)
       if (!origin) return callback(null, true);
       const normalizedOrigin = normalize(origin);
-      // if no CLIENT_URL configured, allow any origin
       if (allowedOrigins.length === 0) return callback(null, true);
       if (allowedOrigins.includes(normalizedOrigin)) return callback(null, true);
       return callback(new Error("Not allowed by CORS"));
@@ -44,6 +42,15 @@ app.use(
 );
 app.use(express.json());
 app.use(morgan("dev"));
+
+// Lightweight caching for GET API responses to reduce conditional requests from browsers.
+app.use((req, res, next) => {
+  if (req.method === "GET" && req.path.startsWith("/api")) {
+    // allow browser to cache for 60 seconds; adjust as needed
+    res.setHeader("Cache-Control", "public, max-age=60, stale-while-revalidate=30");
+  }
+  next();
+});
 
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok" });

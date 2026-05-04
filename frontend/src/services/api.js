@@ -28,7 +28,8 @@ export const projectAPI = {
   create: (payload) => api.post("/projects", payload),
   getMyProjects: () => api.get("/projects"),
   addMember: (projectId, memberId) => api.post(`/projects/${projectId}/members`, { memberId }),
-  removeMember: (projectId, memberId) => api.delete(`/projects/${projectId}/members/${memberId}`)
+  removeMember: (projectId, memberId) => api.delete(`/projects/${projectId}/members/${memberId}`),
+  deleteProject: (projectId) => api.delete(`/projects/${projectId}`)
 };
 
 export const taskAPI = {

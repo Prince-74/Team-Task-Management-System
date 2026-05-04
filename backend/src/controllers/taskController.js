@@ -24,9 +24,9 @@ const createTask = async (req, res, next) => {
       throw new Error("Project not found");
     }
 
-    if (String(project.admin) !== String(req.user._id)) {
+    if (String(project.admin) !== String(req.user._id) && req.user.role !== "admin") {
       res.status(403);
-      throw new Error("Only project admin can create tasks");
+      throw new Error("Only project admin or application admin can create tasks");
     }
 
     const assignee = await User.findById(assignedTo);
@@ -78,19 +78,15 @@ const getTasksByProject = async (req, res, next) => {
       throw new Error("Project not found");
     }
 
-    const isMember = project.members.some((memberId) => String(memberId) === String(req.user._id));
-    if (!isMember) {
-      res.status(403);
-      throw new Error("Only project members can view tasks");
-    }
-
-    // If the requester is the project admin, return all tasks.
-    // Otherwise, members should see only tasks assigned to them.
     const isProjectAdmin = String(project.admin) === String(req.user._id) || req.user.role === "admin";
 
-    const query = isProjectAdmin
-      ? { project: projectId }
-      : { project: projectId, assignedTo: req.user._id };
+    const isMember = project.members.some((memberId) => String(memberId) === String(req.user._id)) || req.user.role === "admin";
+    if (!isMember) {
+      res.status(403);
+      throw new Error("Only project members or application admins can view tasks");
+    }
+
+    const query = isProjectAdmin ? { project: projectId } : { project: projectId, assignedTo: req.user._id };
 
     const tasks = await Task.find(query)
       .populate("assignedTo", "name email role")
@@ -124,9 +120,9 @@ const updateTaskStatus = async (req, res, next) => {
       throw new Error("Task not found");
     }
 
-    if (String(task.assignedTo) !== String(req.user._id)) {
+    if (String(task.assignedTo) !== String(req.user._id) && req.user.role !== "admin") {
       res.status(403);
-      throw new Error("Only assigned user can update status");
+      throw new Error("Only assigned user or application admin can update status");
     }
 
     task.status = status;

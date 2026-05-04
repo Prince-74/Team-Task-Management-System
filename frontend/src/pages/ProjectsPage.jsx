@@ -63,6 +63,17 @@ const ProjectsPage = () => {
     }
   };
 
+  const handleDeleteProject = async (projectId) => {
+    if (!window.confirm("Are you sure you want to delete this project? This action cannot be undone.")) return;
+    setError("");
+    try {
+      await projectAPI.deleteProject(projectId);
+      await loadProjects();
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to delete project");
+    }
+  };
+
   return (
     <Layout>
       <h2 className="text-2xl font-semibold text-slate-900 mb-6">Projects</h2>
@@ -115,7 +126,7 @@ const ProjectsPage = () => {
               ))}
             </div>
 
-            {user?.role === "admin" && String(project.admin?._id) === String(user._id) && (
+            {String(project.admin?._id) === String(user._id) && (
               <div className="mt-3 flex gap-2">
                 <select
                   className="flex-1 rounded-md border border-slate-300 px-3 py-2 text-sm"
@@ -142,6 +153,13 @@ const ProjectsPage = () => {
                   className="rounded-md bg-blue-600 text-white px-3 py-2 text-sm hover:bg-blue-700"
                 >
                   Add
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleDeleteProject(project._id)}
+                  className="rounded-md bg-red-600 text-white px-3 py-2 text-sm hover:bg-red-700"
+                >
+                  Delete Project
                 </button>
               </div>
             )}

@@ -33,10 +33,19 @@ const createProject = async (req, res, next) => {
 
 const getMyProjects = async (req, res, next) => {
   try {
-    const projects = await Project.find({ members: req.user._id })
-      .populate("admin", "name email role")
-      .populate("members", "name email role")
-      .sort({ createdAt: -1 });
+    let projects;
+    if (req.user && req.user.role === "admin") {
+      // application admins can see all projects
+      projects = await Project.find({})
+        .populate("admin", "name email role")
+        .populate("members", "name email role")
+        .sort({ createdAt: -1 });
+    } else {
+      projects = await Project.find({ members: req.user._id })
+        .populate("admin", "name email role")
+        .populate("members", "name email role")
+        .sort({ createdAt: -1 });
+    }
 
     return res.json(projects);
   } catch (error) {
@@ -60,9 +69,9 @@ const addMember = async (req, res, next) => {
       throw new Error("Project not found");
     }
 
-    if (String(project.admin) !== String(req.user._id)) {
+    if (String(project.admin) !== String(req.user._id) && req.user.role !== "admin") {
       res.status(403);
-      throw new Error("Only project admin can add members");
+      throw new Error("Only project admin or application admin can add members");
     }
 
     const member = await User.findById(memberId);
@@ -102,9 +111,9 @@ const removeMember = async (req, res, next) => {
       throw new Error("Project not found");
     }
 
-    if (String(project.admin) !== String(req.user._id)) {
+    if (String(project.admin) !== String(req.user._id) && req.user.role !== "admin") {
       res.status(403);
-      throw new Error("Only project admin can remove members");
+      throw new Error("Only project admin or application admin can remove members");
     }
 
     if (String(project.admin) === String(memberId)) {
@@ -128,9 +137,42 @@ const removeMember = async (req, res, next) => {
   }
 };
 
+const deleteProject = async (req, res, next) => {
+  try {
+    const { projectId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(projectId)) {
+      res.status(400);
+      throw new Error("Invalid project id");
+    }
+
+    const project = await Project.findById(projectId);
+    if (!project) {
+      res.status(404);
+      throw new Error("Project not found");
+    }
+
+    // Only project admin (creator) or application admin can delete
+    if (String(project.admin) !== String(req.user._id) && req.user.role !== "admin") {
+      res.status(403);
+      throw new Error("Only project admin or application admin can delete project");
+    }
+
+    // Remove project reference from users
+    await User.updateMany({ projects: project._id }, { $pull: { projects: project._id } });
+
+    await Project.findByIdAndDelete(project._id);
+
+    return res.json({ message: "Project deleted" });
+  } catch (error) {
+    return next(error);
+  }
+};
+
 module.exports = {
   createProject,
   getMyProjects,
   addMember,
   removeMember
+  ,deleteProject
 };

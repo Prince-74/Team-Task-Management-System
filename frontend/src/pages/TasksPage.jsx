@@ -43,7 +43,7 @@ const TasksPage = () => {
   }, [selectedProjectId]);
 
   const selectedProject = projects.find((project) => project._id === selectedProjectId);
-  const canCreateTask = user?.role === "admin" && String(selectedProject?.admin?._id) === String(user?._id);
+  const canCreateTask = user?.role === "admin" || String(selectedProject?.admin?._id) === String(user?._id);
 
   const handleCreateTask = async (event) => {
     event.preventDefault();
@@ -66,10 +66,15 @@ const TasksPage = () => {
 
   const updateTaskStatus = async (taskId, status) => {
     setError("");
+    const previous = tasks;
+    // optimistic update for snappier UI
+    setTasks((prev) => prev.map((t) => (t._id === taskId ? { ...t, status } : t)));
     try {
       await taskAPI.updateStatus(taskId, status);
+      // refresh to ensure server-side consistency
       await loadTasks(selectedProjectId);
     } catch (err) {
+      setTasks(previous);
       setError(err.response?.data?.message || "Failed to update task status");
     }
   };
